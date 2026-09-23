@@ -4,7 +4,24 @@ const handle = document.querySelector('.comparison-handle');
 const comparison = document.querySelector('.comparison');
 const beforeImage = document.querySelector('.comparison-before img');
 const syncComparisonImage = () => { if (comparison && beforeImage) beforeImage.style.width = `${comparison.clientWidth}px`; };
-if (range) range.addEventListener('input', (event) => { const value = `${event.target.value}%`; before.style.width = value; handle.style.left = value; });
+const updateComparison = (value) => { const nextValue = Math.max(0, Math.min(100, value)); range.value = nextValue; const percentage = `${nextValue}%`; before.style.width = percentage; handle.style.left = percentage; };
+if (range) {
+  range.addEventListener('input', (event) => updateComparison(Number(event.target.value)));
+  const rangeArea = range.closest('.comparison-range');
+  if (rangeArea) {
+    const setFromPointer = (event) => {
+      const bounds = rangeArea.getBoundingClientRect();
+      updateComparison(((event.clientX - bounds.left) / bounds.width) * 100);
+    };
+    rangeArea.addEventListener('pointerdown', (event) => {
+      rangeArea.setPointerCapture(event.pointerId);
+      setFromPointer(event);
+    });
+    rangeArea.addEventListener('pointermove', (event) => {
+      if (event.buttons) setFromPointer(event);
+    });
+  }
+}
 syncComparisonImage();
 window.addEventListener('resize', syncComparisonImage);
 const toggle = document.querySelector('.menu-toggle');
